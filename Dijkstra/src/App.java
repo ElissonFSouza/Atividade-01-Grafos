@@ -1,11 +1,12 @@
 // ATENÇÃO: Execute o código para obter instruções.
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class App {
-
     static Scanner entrada = new Scanner(System.in);
-    static int INFINITY = 9999, qtd_vertices = 100, NILL = -1, origem, destino;
+    static int INFINITY = 9999, qtd_vertices = 100, NILL = -1, origem = -1, destino = -1;
+    static ArrayList<Integer> caminho = new ArrayList<>();
 
     public static void main(String[] args) {
                             // 0  1  2  3  4  5  6  7  8  9
@@ -13,35 +14,25 @@ public class App {
                               {1, 0, 0, 1, 0, 0, 1, 0, 0, 1},  // 1    (para simular um terreno acidentado (peso nas arestas), escolher números inteiros entre 1 e 999)
                               {1, 1, 1, 1, 1, 1, 1, 0, 0, 1},  // 2
                               {1, 0, 0, 0, 0, 1, 0, 0, 1, 1},  // 3
-                              {1, 1, 0, 0, 1, 1, 1, 1, 1, 0},  // 4
-                              {1, 1, 1, 0, 0, 1, 0, 0, 1, 0},  // 5
-                              {1, 0, 1, 1, 1, 1, 1, 1, 1, 0},  // 6
+                              {1, 1, 0, 0, 0, 1, 1, 1, 1, 0},  // 4
+                              {0, 1, 1, 1, 0, 1, 0, 0, 1, 0},  // 5
+                              {1, 1, 0, 1, 1, 1, 1, 1, 1, 0},  // 6
                               {1, 0, 0, 1, 0, 0, 1, 0, 0, 0},  // 7
                               {1, 0, 0, 1, 0, 0, 1, 0, 0, 1},  // 8
                               {1, 0, 0, 1, 1, 1, 1, 1, 1, 1}}; // 9
 
-        System.out.println("\nEste é o mapa atual (para alterá-lo, busque a \"matrizMapa\" no método main do código fonte (Dijkstra > src > App.java):\n");
-        System.out.println("     0 1 2 3 4 5 6 7 8 9\n");
-        for (int i=0; i<10; i++) {
-            System.out.print(i + "    ");
-            for (int j=0; j<10; j++) {
-                if (matrizMapa[i][j] == 0) {
-                    System.out.print("  ");
-                }
-                else {
-                    System.out.print("X ");
-                }
-            }
-            System.out.println(" ");
-        }
+        System.out.print("\nEste é o mapa atual (para alterá-lo, busque a \"matrizMapa\" no método main do código fonte (Dijkstra > src > App.java):");
+
+        imprimirMatrizMapa(matrizMapa);
 
         System.out.println("\n(X representa um caminho livre)." +
-                "\n(Os vértices estão numerados de 00 a 99).\n" +
-                "(Exemplo: para escolher as coordenadas (4,7), deve ser digitado \"47\", onde 4 representa a linha, e 7 a coluna).");
+                "\n(Cada vértice pode ser representado por um número de 00 a 99).\n" +
+                "(Exemplo: para escolher as coordenadas [4,7], deve ser digitado \"47\", onde 4 representa a linha, e 7 a coluna).");
         System.out.print("\nEscolha a coordenada de origem: ");
         origem = entrada.nextInt();
         System.out.print("Escolha a coordenada de destino: ");
         destino = entrada.nextInt();
+
         System.out.println("\nResultado:");
 
         transformarMatriz(matrizMapa);
@@ -86,10 +77,10 @@ public class App {
             }
         }
 
-        dijkstra(matrizAdjacencia, origem, destino);
+        dijkstra(matrizAdjacencia, matrizMapa, origem, destino);
     }
 
-    static void dijkstra(int[][] Graph, int orig, int dest) {
+    static void dijkstra(int[][] Graph, int[][] matrizMapa, int orig, int dest) {
         int i, u, v, count;
         int[] dist = new int[qtd_vertices];
         int[] Blackened = new int[qtd_vertices];
@@ -104,8 +95,7 @@ public class App {
             dist[i] = INFINITY;
 
         dist[orig] = 0;
-        for (count = 0; count < qtd_vertices - 1; count++)
-        {
+        for (count = 0; count < qtd_vertices - 1; count++) {
             u = minDistance(dist, Blackened);
 
             // if MinDistance() returns INFINITY, then the graph is not
@@ -116,23 +106,19 @@ public class App {
             // is not a root
             if (u == INFINITY)
                 break;
-            else
-            {
+            else {
                 // Mark the vertex as Blackened
                 Blackened[u] = 1;
-                for (v = 0; v < qtd_vertices; v++)
-                {
+                for (v = 0; v < qtd_vertices; v++)  {
                     if (Blackened[v] == 0 && Graph[u][v] != 0
-                            && dist[u] + Graph[u][v] < dist[v])
-                    {
+                            && dist[u] + Graph[u][v] < dist[v]) {
                         parent[v] = u;
                         pathlength[v] = pathlength[parent[v]] + 1;
                         dist[v] = dist[u] + Graph[u][v];
                     }
                     else if (Blackened[v] == 0 && Graph[u][v] != 0
                             && dist[u] + Graph[u][v] == dist[v]
-                            && pathlength[u] + 1 < pathlength[v])
-                    {
+                            && pathlength[u] + 1 < pathlength[v]) {
                         parent[v] = u;
                         pathlength[v] = pathlength[u] + 1;
                     }
@@ -141,18 +127,19 @@ public class App {
         }
 
         // Printing the path
-        if (dist[dest] != INFINITY)
+        if (dist[dest] != INFINITY) {
             printPath(parent, dest);
+            imprimirMatrizMapa(matrizMapa);
+        }
+
         else
-            System.out.println("Não há um caminho do vértice " +
-                    orig + " para o vértice " + dest + ".");
+            System.out.println("Não há um caminho do vértice " + orig + " para o vértice " + dest + ".");
     }
 
     static int minDistance(int[] dist, int[] Blackened) {
         int min = INFINITY, min_index = -1, v;
         for (v = 0; v < qtd_vertices; v++)
-            if (Blackened[v] == 0 && dist[v] < min)
-            {
+            if (Blackened[v] == 0 && dist[v] < min) {
                 min = dist[v];
                 min_index = v;
             }
@@ -160,12 +147,41 @@ public class App {
     }
 
     static void printPath(int[] parent, int _d) { // Function to print the path
-        if (parent[_d] == NILL)
-        {
+        if (parent[_d] == NILL) {
             System.out.print(_d);
+            caminho.add(_d);
             return;
         }
         printPath(parent, parent[_d]);
         System.out.print("->" + _d);
+        caminho.add(_d);
+    }
+
+    static void imprimirMatrizMapa(int[][] matrizMapa) {
+        for(Integer vertice : caminho) {
+            matrizMapa[vertice/10][vertice%10] = -1;
+        }
+
+        System.out.println("\n\n     0 1 2 3 4 5 6 7 8 9\n");
+        for (int i=0; i<10; i++) {
+            System.out.print(i + "    ");
+            for (int j=0; j<10; j++) {
+                if (matrizMapa[i][j] == 0) {
+                    System.out.print("  ");
+                }
+                else if (matrizMapa[i][j] == -1) {
+                    if ((i*10) + j == origem || (i*10) + j == destino) {
+                        System.out.print("ª ");
+                    }
+                    else {
+                        System.out.print("º ");
+                    }
+                }
+                else {
+                    System.out.print("X ");
+                }
+            }
+            System.out.println(" ");
+        }
     }
 }
