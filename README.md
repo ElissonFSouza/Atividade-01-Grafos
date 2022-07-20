@@ -1,4 +1,4 @@
-# Dijkstra
+# Atividade 01 - Teoria dos Grafos
 Executar código para obter instruções. (Dijkstra > src > App.java)
 
 Para alterar o mapa, busque a "matrizMapa" no método main do código fonte (Dijkstra > src > App.java > App.main()).  
